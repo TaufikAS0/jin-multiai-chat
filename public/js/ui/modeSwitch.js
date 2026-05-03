@@ -33,7 +33,7 @@ export function initModeSwitch() {
   });
 }
 
-function populateAgentSelectors() {
+export function populateAgentSelectors() {
   const plannerSelect = document.getElementById('planner-select');
   const agentList = document.getElementById('agent-list');
 

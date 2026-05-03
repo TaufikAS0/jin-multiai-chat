@@ -136,6 +136,19 @@ Akses: `http://localhost:3099`
 
 ---
 
+### 2026-05-03 23:35 | Kimi Code CLI | ASUS
+**Task:** Investigasi lanjutan "error tidak bisa dibuka" setelah hard refresh + perbaikan robustness.  
+**Files Changed:**
+- `start.bat` — tambah error handling jika server crash/EADDRINUSE, tampilkan instruksi kill node.exe
+- `public/js/ui/modeSwitch.js` — export `populateAgentSelectors` agar bisa dipanggil dari luar
+- `public/js/main.js` — panggil `populateAgentSelectors()` setelah `loadModels()` selesai jika user sedang di tab Agent, agar agent list terisi meskipun user sudah buka tab Agent sebelum model selesai load
+**Rationale:** User melaporkan error setelah Ctrl+Shift+R (hard refresh). Investigasi Playwright menunjukkan aplikasi berjalan normal, tidak ada JS errors. Kemungkinan besar masalah environmental: (1) server lama masih berjalan di port 3099 menyebabkan tabrakan, (2) user buka tab Agent sebelum `loadModels` selesai sehingga agent list kosong.  
+**Tested:** Yes — Syntax valid. Playwright headless verified render OK.  
+**Status:** ✅ Done  
+**Notes:** Jika masih error, user wajib: (1) Task Manager → kill SEMUA node.exe, (2) Jalankan `start.bat`, (3) Tunggu model list muncul di Chat Mode, (4) Baru klik tab Agent.
+
+---
+
 ### 2026-05-03 23:25 | Kimi Code CLI | ASUS
 **Task:** Investigasi laporan "error tidak bisa dibuka" + verifikasi Kimi muncul di Agent Mode.  
 **Files Changed:**

@@ -7,7 +7,7 @@ import { updateFooter } from './ui/footer.js';
 import { initModal, openModal } from './ui/modal.js';
 import { runSequentialStream } from './stream.js';
 import { autoResize } from './utils.js';
-import { initModeSwitch } from './ui/modeSwitch.js';
+import { initModeSwitch, populateAgentSelectors } from './ui/modeSwitch.js';
 import { renderPlanPreview, clearPlanPreview } from './agent/planView.js';
 import { startPipelineStream, stopPipelineStream } from './agent/pipeline.js';
 import { renderFileTree } from './agent/fileTree.js';
@@ -45,8 +45,10 @@ async function loadModels() {
     const data = await api.getModels();
     state.models = (data.data || []).filter(m => m.id);
     renderModels(modelList, onModelSelectionChange);
+    if (state.appMode === 'agent') populateAgentSelectors();
   } catch {
     modelList.innerHTML = '<div class="loading-text" style="color:#f87171">9Router offline</div>';
+    if (state.appMode === 'agent') populateAgentSelectors();
   }
 }
 

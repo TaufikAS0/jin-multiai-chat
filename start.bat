@@ -21,3 +21,13 @@ echo Server: http://localhost:3099
 echo Tekan Ctrl+C untuk berhenti.
 echo.
 node server.js
+if errorlevel 1 (
+    echo.
+    echo ============================================
+    echo  Server berhenti dengan error.
+    echo  Kemungkinan: port 3099 masih dipakai
+    echo  oleh server lama. Buka Task Manager,
+    echo  tab Details, cari node.exe, lalu End Task.
+    echo ============================================
+    pause
+)
