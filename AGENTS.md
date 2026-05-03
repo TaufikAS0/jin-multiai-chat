@@ -136,6 +136,16 @@ Akses: `http://localhost:3099`
 
 ---
 
+### 2026-05-03 23:55 | Kimi Code CLI | ASUS
+**Task:** Tambah cache busting (`?v=3`) di `index.html` agar browser tidak pakai JS lama setelah update.  
+**Files Changed:**
+- `public/index.html` — `<script src="js/main.js?v=3">`
+**Rationale:** User frustrasi karena perubahan kode tidak terlihat di browser. ES module sering di-cache oleh browser meskipun hard refresh. Query param memaksa fetch ulang.  
+**Tested:** Yes — Syntax valid.  
+**Status:** ✅ Done
+
+---
+
 ### 2026-05-03 23:50 | Kimi Code CLI | ASUS
 **Task:** Fix Kimi (dan model lain) tidak muncul di Agent Mode — unify renderer antara Chat dan Agent.  
 **Files Changed:**
