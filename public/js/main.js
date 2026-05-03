@@ -43,7 +43,7 @@ async function init() {
 async function loadModels() {
   try {
     const data = await api.getModels();
-    state.models = (data.data || []).filter(m => m.id && m.owned_by);
+    state.models = (data.data || []).filter(m => m.id);
     renderModels(modelList, onModelSelectionChange);
   } catch {
     modelList.innerHTML = '<div class="loading-text" style="color:#f87171">9Router offline</div>';

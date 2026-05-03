@@ -136,6 +136,17 @@ Akses: `http://localhost:3099`
 
 ---
 
+### 2026-05-03 22:55 | Kimi Code CLI | ASUS
+**Task:** Fix bug model list filter yang menghapus model tanpa field `owned_by` (termasuk Kimi).  
+**Files Changed:**
+- `public/js/main.js` — baris 46: filter diubah dari `m.id && m.owned_by` menjadi `m.id` saja. Penyebab: 9Router tidak selalu mengirim field `owned_by` untuk semua model, sehingga Kimi dan model lain dihapus dari `state.models` sebelum ditampilkan.
+**Rationale:** User melaporkan Kimi tidak muncul di Agent Mode padahal 9Router online. Investigasi menemukan filter terlalu ketat di `loadModels()`.  
+**Tested:** Yes — Syntax valid (`node -c`). Render models & modeSwitch sudah punya fallback `m.id.split('/')[0]` untuk grouping.  
+**Status:** ✅ Done  
+**Notes:** Setelah fix ini, semua model yang punya `id` akan muncul di Chat Mode dan Agent Mode, termasuk yang tidak memiliki `owned_by`. Badge/grouping tetap aman karena sudah handle fallback.
+
+---
+
 ### 2026-05-03 22:45 | Kimi Code CLI | ASUS
 **Task:** Implementasi Phase 1–3: Transformasi JIN MultiAI Chat menjadi JIN Agent Orchestra (1 Planner + Multi-Agent Hybrid Sequential/Parallel) dengan kemampuan agent membuat file, membaca file, mengedit file, dan menjalankan command.  
 **Files Changed:**
