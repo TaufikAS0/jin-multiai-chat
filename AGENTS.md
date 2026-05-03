@@ -136,6 +136,18 @@ Akses: `http://localhost:3099`
 
 ---
 
+### 2026-05-03 23:50 | Kimi Code CLI | ASUS
+**Task:** Fix Kimi (dan model lain) tidak muncul di Agent Mode — unify renderer antara Chat dan Agent.  
+**Files Changed:**
+- `public/js/ui/models.js` — refactor `renderModels` jadi generic `renderModelChecklist(container, selectedSet, onChange, dataAttr)` agar Chat Mode dan Agent Mode pakai logika render yang identik persis
+- `public/js/ui/modeSwitch.js` — ganti `populateAgentSelectors` custom (DOM API) dengan pemanggilan `renderModelChecklist` dari `models.js`. Ini menghilangkan perbedaan perilaku antara Chat Mode (Kimi muncul) dan Agent Mode (Kimi tidak muncul)
+**Rationale:** User melaporkan Kimi muncul di Chat Mode tapi tidak di Agent Mode. Penyebabnya adalah dua fungsi render berbeda (`renderModels` vs `populateAgentSelectors` custom) yang seharusnya identik. Dengan unify renderer, apa pun yang muncul di Chat Mode pasti muncul di Agent Mode.  
+**Tested:** Yes — Syntax valid (`node -c`). Logika `renderModelChecklist` identik dengan `renderModels` yang sudah terbukti bekerja.  
+**Status:** ✅ Done  
+**Notes:** User wajib hard refresh `Ctrl+F5` setelah pull agar browser memuat JS baru.
+
+---
+
 ### 2026-05-03 23:35 | Kimi Code CLI | ASUS
 **Task:** Investigasi lanjutan "error tidak bisa dibuka" setelah hard refresh + perbaikan robustness.  
 **Files Changed:**

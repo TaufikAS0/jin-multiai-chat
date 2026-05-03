@@ -15,7 +15,11 @@ export function getBadge(model) {
   return { text: owner, cls: 'badge-paid' };
 }
 
-export function renderModels(container, onSelectionChange) {
+/**
+ * Generic model checklist renderer.
+ * Used by both Chat Mode (selectedModels) and Agent Mode (activeAgents).
+ */
+export function renderModelChecklist(container, selectedSet, onSelectionChange, dataAttr = 'data-model') {
   if (!state.models.length) {
     container.innerHTML = '<div class="loading-text" style="color:#f87171">9Router offline</div>';
     return;
@@ -37,10 +41,10 @@ export function renderModels(container, onSelectionChange) {
         <span class="model-badge ${badge.cls}">${badge.text}</span>
       </div>`;
     for (const m of models) {
-      const checked = state.selectedModels.has(m.id) ? 'checked' : '';
+      const checked = selectedSet.has(m.id) ? 'checked' : '';
       const shortId = m.id.includes('/') ? m.id.split('/').slice(1).join('/') : m.id;
       html += `<label class="model-item">
-        <input type="checkbox" data-model="${m.id}" ${checked} />
+        <input type="checkbox" ${dataAttr}="${m.id}" ${checked} />
         <span class="model-label ${checked ? 'active' : ''}">${escHtml(shortId)}</span>
       </label>`;
     }
@@ -50,10 +54,15 @@ export function renderModels(container, onSelectionChange) {
 
   container.querySelectorAll('input[type=checkbox]').forEach(cb => {
     cb.addEventListener('change', () => {
-      if (cb.checked) state.selectedModels.add(cb.dataset.model);
-      else state.selectedModels.delete(cb.dataset.model);
+      const modelId = cb.getAttribute(dataAttr);
+      if (cb.checked) selectedSet.add(modelId);
+      else selectedSet.delete(modelId);
       cb.closest('.model-item').querySelector('.model-label').classList.toggle('active', cb.checked);
-      onSelectionChange();
+      if (onSelectionChange) onSelectionChange();
     });
   });
+}
+
+export function renderModels(container, onSelectionChange) {
+  renderModelChecklist(container, state.selectedModels, onSelectionChange, 'data-model');
 }
