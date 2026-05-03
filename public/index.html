@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JIN MultiAI Chat</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <span class="logo">JIN MultiAI</span>
+        <button id="btn-new-session" title="Session baru">+</button>
+      </div>
+      <div class="sidebar-section">
+        <div class="section-label">MODELS</div>
+        <div id="model-list"><div class="loading-text">Memuat model...</div></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="section-label">SESSIONS</div>
+        <div id="session-list"><div class="loading-text">Memuat...</div></div>
+      </div>
+    </aside>
+
+    <main id="main">
+      <div id="chat-header">
+        <div id="chat-title">Pilih atau buat session</div>
+        <div id="chat-actions">
+          <button id="btn-clear-chat" class="icon-btn" style="display:none" title="Hapus percakapan">🗑</button>
+          <button id="btn-session-settings" class="icon-btn" style="display:none" title="Pengaturan session">⚙</button>
+        </div>
+      </div>
+
+      <div id="chat-body">
+        <div id="empty-state">
+          <div class="empty-icon">◈</div>
+          <div class="empty-title">JIN MultiAI Chat</div>
+          <div class="empty-sub">Tanya satu pertanyaan — AI menjawab bergantian.<br/>Setiap AI menerima konteks dari AI sebelumnya.</div>
+          <button id="btn-start" class="btn-primary">Mulai Session</button>
+        </div>
+      </div>
+
+      <div id="chat-footer" style="display:none">
+        <div id="selected-models-bar"></div>
+        <div id="input-row">
+          <textarea id="input-msg" placeholder="Tanya semua AI yang dipilih..." rows="1"></textarea>
+          <button id="btn-send">Kirim</button>
+        </div>
+        <div id="input-hint">Enter untuk kirim · Shift+Enter untuk baris baru · <span id="model-count">0 model dipilih</span></div>
+      </div>
+    </main>
+
+  </div>
+
+  <div id="modal-settings" class="modal" style="display:none">
+    <div class="modal-box">
+      <div class="modal-title">Pengaturan Session</div>
+      <label>Nama Session</label>
+      <input type="text" id="settings-name" placeholder="Session saya" />
+      <label>System Prompt <span class="hint">(opsional)</span></label>
+      <textarea id="settings-system" rows="4" placeholder="Kamu adalah asisten yang membantu..."></textarea>
+      <div class="modal-actions">
+        <button id="btn-settings-cancel" class="btn-ghost">Batal</button>
+        <button id="btn-settings-save" class="btn-primary">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
