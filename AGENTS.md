@@ -136,6 +136,17 @@ Akses: `http://localhost:3099`
 
 ---
 
+### 2026-05-03 23:25 | Kimi Code CLI | ASUS
+**Task:** Investigasi laporan "error tidak bisa dibuka" + verifikasi Kimi muncul di Agent Mode.  
+**Files Changed:**
+- Tidak ada perubahan kode — aplikasi ternyata berjalan normal.
+**Rationale:** User melaporkan error setelah pull. Investigasi mendalam dengan Playwright headless browser menunjukkan: (1) Server start tanpa error, (2) Semua assets HTTP 200, (3) Tidak ada JavaScript runtime errors, (4) Kimi dan semua model muncul dengan normal di Chat Mode dan Agent Mode. Penyebab laporan user kemungkinan: server belum restart setelah pull, browser cache lama, atau port 3099 masih dipakai proses lama.  
+**Tested:** Yes — Playwright screenshot + DOM dump membuktikan Kimi (`kimi-k2.5`, `kimi-k2.5-thinking`, `kimi-latest`) muncul di Agent Mode planner dropdown dan agent checklist.  
+**Status:** ✅ Done (no code change required)  
+**Notes:** Instruksi ke user: (1) Pastikan tidak ada node.exe lain di Task Manager, (2) Jalankan `start.bat`, (3) Hard refresh browser `Ctrl+F5`, (4) Klik tab Agent — Kimi akan muncul.
+
+---
+
 ### 2026-05-03 22:55 | Kimi Code CLI | ASUS
 **Task:** Fix bug model list filter yang menghapus model tanpa field `owned_by` (termasuk Kimi).  
 **Files Changed:**
