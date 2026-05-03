@@ -2,10 +2,11 @@ import { state } from './state.js';
 import * as api from './api.js';
 import { renderModels } from './ui/models.js';
 import { renderSessions } from './ui/sessions.js';
-import { renderChat, buildTurnEl } from './ui/chat.js';
+import { renderChat, buildTurnEl, buildCompactBlock } from './ui/chat.js';
 import { updateFooter } from './ui/footer.js';
 import { initModal, openModal } from './ui/modal.js';
 import { runSequentialStream } from './stream.js';
+import { renderChat, buildCompactBlock } from './ui/chat.js';
 import { autoResize } from './utils.js';
 
 // DOM refs
@@ -102,10 +103,49 @@ async function onDeleteSession(id) {
 }
 
 // ── Send ──────────────────────────────────────────────────────────────────────
+async function compactSession() {
+  if (!state.activeSessionId) return;
+  if (state.selectedModels.size === 0) { alert('Pilih minimal 1 model untuk meringkas.'); return; }
+
+  const model = [...state.selectedModels][0];
+  btnSend.disabled = true;
+  inputMsg.value = '';
+
+  const indicator = document.createElement('div');
+  indicator.className = 'compact-loading';
+  indicator.textContent = `⚡ Memadatkan dengan ${model}...`;
+  chatBody.appendChild(indicator);
+  chatBody.scrollTop = chatBody.scrollHeight;
+
+  try {
+    const result = await api.compactSession(state.activeSessionId, model);
+    indicator.remove();
+    if (result.error) throw new Error(result.error);
+
+    // Re-render chat with compact block
+    chatBody.innerHTML = '';
+    const compactMsg = { role: 'compact', model, content: result.summary, timestamp: new Date().toISOString(), originalCount: result.originalCount };
+    chatBody.appendChild(buildCompactBlock(compactMsg));
+    loadSessions();
+  } catch (e) {
+    indicator.textContent = `Error: ${e.message}`;
+    indicator.style.color = 'var(--red)';
+  }
+  btnSend.disabled = false;
+}
+
 async function sendMessage() {
   const text = inputMsg.value.trim();
   if (!text || state.streaming) return;
   if (!state.activeSessionId) { alert('Buat atau pilih session dulu.'); return; }
+
+  if (text === '/compact') {
+    inputMsg.value = '';
+    autoResize(inputMsg);
+    await compactSession();
+    return;
+  }
+
   if (state.selectedModels.size === 0) { alert('Pilih minimal 1 model.'); return; }
 
   inputMsg.value = '';

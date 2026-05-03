@@ -7,14 +7,34 @@ export function renderChat(container, messages) {
   const turns = [];
   let current = null;
   for (const msg of messages) {
-    if (msg.role === 'user') {
+    if (msg.role === 'compact') {
+      turns.push({ compact: msg });
+      current = null;
+    } else if (msg.role === 'user') {
       current = { user: msg, responses: [] };
       turns.push(current);
     } else if (msg.role === 'assistant' && current) {
       current.responses.push(msg);
     }
   }
-  for (const t of turns) container.appendChild(buildTurnEl(t.user, t.responses));
+  for (const t of turns) {
+    if (t.compact) container.appendChild(buildCompactBlock(t.compact));
+    else container.appendChild(buildTurnEl(t.user, t.responses));
+  }
+}
+
+export function buildCompactBlock(msg) {
+  const block = document.createElement('div');
+  block.className = 'compact-block';
+  const date = new Date(msg.timestamp).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+  block.innerHTML = `
+    <div class="compact-header">
+      <span class="compact-icon">⚡</span>
+      <span class="compact-label">Compact</span>
+      <span class="compact-meta">${msg.originalCount || '?'} pesan dipadatkan · ${date} · via ${escHtml(msg.model)}</span>
+    </div>
+    <div class="compact-body">${renderMarkdown(msg.content)}</div>`;
+  return block;
 }
 
 export function buildTurnEl(userMsg, responses = []) {
@@ -35,7 +55,7 @@ export function buildTurnEl(userMsg, responses = []) {
     stack.appendChild(buildAiCard(r.model, r.content, 'done'));
   });
 
-  if (stack.children.length) turn.appendChild(stack);
+  turn.appendChild(stack);
   return turn;
 }
 

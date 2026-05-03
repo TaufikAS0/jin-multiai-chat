@@ -41,6 +41,15 @@ export async function clearMessages(id) {
   await fetch(`${base}/api/sessions/${id}/messages`, { method: 'DELETE' });
 }
 
+export async function compactSession(sessionId, model) {
+  const r = await fetch(`${base}/api/chat/compact`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sessionId, model }),
+  });
+  return r.json();
+}
+
 export function startSequentialStream(sessionId, models, message) {
   return fetch(`${base}/api/chat/sequential`, {
     method: 'POST',
