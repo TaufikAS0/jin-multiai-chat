@@ -9,6 +9,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/models',   require('./src/routes/models'));
 app.use('/api/sessions', require('./src/routes/sessions'));
 app.use('/api/chat',     require('./src/routes/chat'));
+app.use('/api/agent',    require('./src/routes/agent'));
 
 app.listen(PORT, () => {
   console.log(`\n  JIN MultiAI Chat`);

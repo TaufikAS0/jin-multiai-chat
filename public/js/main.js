@@ -6,8 +6,12 @@ import { renderChat, buildTurnEl, buildCompactBlock } from './ui/chat.js';
 import { updateFooter } from './ui/footer.js';
 import { initModal, openModal } from './ui/modal.js';
 import { runSequentialStream } from './stream.js';
-import { renderChat, buildCompactBlock } from './ui/chat.js';
 import { autoResize } from './utils.js';
+import { initModeSwitch } from './ui/modeSwitch.js';
+import { renderPlanPreview, clearPlanPreview } from './agent/planView.js';
+import { startPipelineStream, stopPipelineStream } from './agent/pipeline.js';
+import { renderFileTree } from './agent/fileTree.js';
+import { logConsole } from './agent/console.js';
 
 // DOM refs
 const modelList      = document.getElementById('model-list');
@@ -18,6 +22,7 @@ const chatFooter     = document.getElementById('chat-footer');
 const selectedBar    = document.getElementById('selected-models-bar');
 const inputMsg       = document.getElementById('input-msg');
 const btnSend        = document.getElementById('btn-send');
+const btnStop        = document.getElementById('btn-stop');
 const modelCount     = document.getElementById('model-count');
 const emptyState     = document.getElementById('empty-state');
 const btnNewSession  = document.getElementById('btn-new-session');
@@ -150,12 +155,11 @@ async function sendMessage() {
 
   inputMsg.value = '';
   autoResize(inputMsg);
-  state.streaming = true;
-  btnSend.disabled = true;
+  setStreaming(true);
 
   const models = [...state.selectedModels];
+  state.abortController = new AbortController();
 
-  // Build turn UI immediately
   const userMsg = { id: Date.now().toString(), role: 'user', content: text, timestamp: new Date().toISOString() };
   const turnEl = buildTurnEl(userMsg, []);
   chatBody.appendChild(turnEl);
@@ -168,17 +172,27 @@ async function sendMessage() {
       message: text,
       chatBody,
       turnEl,
+      signal: state.abortController.signal,
       onTurnDone: () => loadSessions(),
     });
   } catch (e) {
-    const errDiv = document.createElement('div');
-    errDiv.className = 'error-text';
-    errDiv.textContent = `Error: ${e.message}`;
-    chatBody.appendChild(errDiv);
+    if (e.name !== 'AbortError') {
+      const errDiv = document.createElement('div');
+      errDiv.className = 'error-text';
+      errDiv.textContent = `Error: ${e.message}`;
+      chatBody.appendChild(errDiv);
+    }
   }
 
-  state.streaming = false;
-  btnSend.disabled = false;
+  state.abortController = null;
+  setStreaming(false);
+  loadSessions();
+}
+
+function setStreaming(on) {
+  state.streaming = on;
+  btnSend.style.display = on ? 'none' : '';
+  btnStop.style.display = on ? '' : 'none';
 }
 
 // ── Event Listeners ───────────────────────────────────────────────────────────
@@ -190,6 +204,10 @@ inputMsg.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
 inputMsg.addEventListener('input', () => autoResize(inputMsg));
+
+btnStop.addEventListener('click', () => {
+  if (state.abortController) state.abortController.abort();
+});
 
 btnClear.addEventListener('click', async () => {
   if (!state.activeSessionId || !confirm('Hapus semua pesan?')) return;
@@ -207,6 +225,49 @@ initModal(modal, settingsName, settingsSystem, btnCancel, btnSaveModal, async ({
   await api.updateSession(state.activeSessionId, { name, systemPrompt });
   chatTitle.textContent = name;
   loadSessions();
+});
+
+// ── Agent Mode ────────────────────────────────────────────────────────────────
+initModeSwitch();
+
+const btnPlan = document.getElementById('btn-plan');
+const btnRun = document.getElementById('btn-run-workflow');
+const btnRegen = document.getElementById('btn-regen-plan');
+
+btnPlan?.addEventListener('click', async () => {
+  const goal = document.getElementById('agent-goal').value.trim();
+  if (!goal) return alert('Masukkan goal terlebih dahulu.');
+  if (!state.plannerModel) return alert('Pilih planner model.');
+  if (state.activeAgents.size === 0) return alert('Pilih minimal 1 agent aktif.');
+  btnPlan.disabled = true;
+  btnPlan.textContent = 'Merencanakan...';
+  try {
+    const result = await api.planWorkflow(goal, state.plannerModel, [...state.activeAgents]);
+    if (result.error) throw new Error(result.error);
+    state.currentWorkflow = result;
+    renderPlanPreview(result);
+  } catch (e) {
+    alert('Gagal membuat rencana: ' + e.message);
+  } finally {
+    btnPlan.disabled = false;
+    btnPlan.textContent = 'Buat Rencana';
+  }
+});
+
+btnRun?.addEventListener('click', async () => {
+  if (!state.currentWorkflow) return;
+  try {
+    await api.runWorkflow(state.currentWorkflow.workflowId);
+    startPipelineStream(state.currentWorkflow.workflowId);
+    renderFileTree(state.currentWorkflow.workflowId);
+  } catch (e) {
+    alert('Gagal menjalankan workflow: ' + e.message);
+  }
+});
+
+btnRegen?.addEventListener('click', () => {
+  clearPlanPreview();
+  state.currentWorkflow = null;
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────

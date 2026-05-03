@@ -12,48 +12,122 @@
     <aside id="sidebar">
       <div class="sidebar-header">
         <span class="logo">JIN MultiAI</span>
+        <div class="mode-tabs">
+          <button id="tab-chat" class="mode-tab active">Chat</button>
+          <button id="tab-agent" class="mode-tab">Agent</button>
+        </div>
         <button id="btn-new-session" title="Session baru">+</button>
       </div>
-      <div class="sidebar-section">
-        <div class="section-label">MODELS</div>
-        <div id="model-list"><div class="loading-text">Memuat model...</div></div>
+
+      <!-- Chat Sidebar -->
+      <div id="chat-sidebar" class="sidebar-mode">
+        <div class="sidebar-section">
+          <div class="section-label">MODELS</div>
+          <div id="model-list"><div class="loading-text">Memuat model...</div></div>
+        </div>
+        <div class="sidebar-section">
+          <div class="section-label">SESSIONS</div>
+          <div id="session-list"><div class="loading-text">Belum ada session</div></div>
+        </div>
       </div>
-      <div class="sidebar-section">
-        <div class="section-label">SESSIONS</div>
-        <div id="session-list"><div class="loading-text">Memuat...</div></div>
+
+      <!-- Agent Sidebar -->
+      <div id="agent-sidebar" class="sidebar-mode" style="display:none">
+        <div class="sidebar-section" style="flex-shrink:0">
+          <div class="section-label">PLANNER</div>
+          <select id="planner-select" class="agent-select">
+            <option value="">Pilih model planner...</option>
+          </select>
+        </div>
+        <div class="sidebar-section" style="flex-shrink:0;max-height:200px">
+          <div class="section-label">AGENTS AKTIF</div>
+          <div id="agent-list"><div class="loading-text">Memuat model...</div></div>
+        </div>
+        <div class="sidebar-section" style="flex-shrink:0">
+          <div class="section-label">GOAL</div>
+          <textarea id="agent-goal" rows="3" placeholder="Deskripsikan tugas yang ingin dikerjakan..."></textarea>
+          <button id="btn-plan" class="btn-primary" style="width:100%;margin-top:8px">Buat Rencana</button>
+        </div>
+        <div class="sidebar-section">
+          <div class="section-label">WORKFLOWS</div>
+          <div id="workflow-list"><div class="loading-text">Belum ada workflow</div></div>
+        </div>
       </div>
     </aside>
 
     <main id="main">
-      <div id="chat-header">
-        <div id="chat-title">Pilih atau buat session</div>
-        <div id="chat-actions">
-          <button id="btn-clear-chat" class="icon-btn" style="display:none" title="Hapus percakapan">🗑</button>
-          <button id="btn-session-settings" class="icon-btn" style="display:none" title="Pengaturan session">⚙</button>
+      <!-- Chat Main -->
+      <div id="chat-main" class="main-mode">
+        <div id="chat-header">
+          <div id="chat-title">Pilih atau buat session</div>
+          <div id="chat-actions">
+            <button id="btn-clear-chat" class="icon-btn" style="display:none" title="Hapus percakapan">🗑</button>
+            <button id="btn-session-settings" class="icon-btn" style="display:none" title="Pengaturan session">⚙</button>
+          </div>
+        </div>
+
+        <div id="chat-body">
+          <div id="empty-state">
+            <div class="empty-icon">◈</div>
+            <div class="empty-title">JIN MultiAI Chat</div>
+            <div class="empty-sub">Tanya satu pertanyaan — AI menjawab bergantian.<br/>Setiap AI menerima konteks dari AI sebelumnya.</div>
+            <button id="btn-start" class="btn-primary">Mulai Session</button>
+          </div>
+        </div>
+
+        <div id="chat-footer" style="display:none">
+          <div id="selected-models-bar"></div>
+          <div id="input-row">
+            <textarea id="input-msg" placeholder="Tanya semua AI yang dipilih..." rows="1"></textarea>
+            <button id="btn-send">Kirim</button>
+            <button id="btn-stop" style="display:none">⏹ Stop</button>
+          </div>
+          <div id="input-hint">Enter untuk kirim · Shift+Enter baris baru · <code>/compact</code> padatkan context · <span id="model-count">0 model dipilih</span></div>
         </div>
       </div>
 
-      <div id="chat-body">
-        <div id="empty-state">
-          <div class="empty-icon">◈</div>
-          <div class="empty-title">JIN MultiAI Chat</div>
-          <div class="empty-sub">Tanya satu pertanyaan — AI menjawab bergantian.<br/>Setiap AI menerima konteks dari AI sebelumnya.</div>
-          <button id="btn-start" class="btn-primary">Mulai Session</button>
+      <!-- Agent Main -->
+      <div id="agent-main" class="main-mode" style="display:none">
+        <div id="agent-header">
+          <div id="agent-title">Agent Mode</div>
+          <div id="agent-actions">
+            <button id="btn-run-workflow" class="btn-primary" style="display:none">▶ Jalankan</button>
+            <button id="btn-regen-plan" class="btn-ghost" style="display:none">↻ Buat Ulang</button>
+          </div>
         </div>
-      </div>
 
-      <div id="chat-footer" style="display:none">
-        <div id="selected-models-bar"></div>
-        <div id="input-row">
-          <textarea id="input-msg" placeholder="Tanya semua AI yang dipilih..." rows="1"></textarea>
-          <button id="btn-send">Kirim</button>
+        <div id="agent-body">
+          <div id="agent-empty">
+            <div class="empty-icon">◈</div>
+            <div class="empty-title">JIN Agent Orchestra</div>
+            <div class="empty-sub">1. Pilih Planner & aktifkan Agents di sidebar<br/>2. Deskripsikan goal dan buat rencana<br/>3. Jalankan dan lihat agent bekerja</div>
+          </div>
+
+          <div id="plan-preview" style="display:none"></div>
+
+          <div id="pipeline-view" style="display:none">
+            <div class="agent-panels">
+              <div class="agent-panel" id="panel-pipeline">
+                <div class="panel-title">Pipeline</div>
+                <div id="pipeline-board"></div>
+              </div>
+              <div class="agent-panel" id="panel-files">
+                <div class="panel-title">Workspace Files</div>
+                <div id="file-tree"></div>
+              </div>
+              <div class="agent-panel" id="panel-console">
+                <div class="panel-title">Console</div>
+                <div id="agent-console"></div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div id="input-hint">Enter untuk kirim · Shift+Enter baris baru · <code>/compact</code> padatkan context · <span id="model-count">0 model dipilih</span></div>
       </div>
     </main>
 
   </div>
 
+  <!-- Session Settings Modal -->
   <div id="modal-settings" class="modal" style="display:none">
     <div class="modal-box">
       <div class="modal-title">Pengaturan Session</div>
@@ -64,6 +138,18 @@
       <div class="modal-actions">
         <button id="btn-settings-cancel" class="btn-ghost">Batal</button>
         <button id="btn-settings-save" class="btn-primary">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Approval Modal -->
+  <div id="modal-approval" class="modal" style="display:none">
+    <div class="modal-box">
+      <div class="modal-title" id="approval-title">Approval Diperlukan</div>
+      <div id="approval-body" style="font-size:13px;color:var(--text2);white-space:pre-wrap;word-break:break-word;background:var(--bg3);padding:10px;border-radius:6px;margin:8px 0"></div>
+      <div class="modal-actions">
+        <button id="btn-approval-deny" class="btn-ghost">Tolak</button>
+        <button id="btn-approval-allow" class="btn-primary">Izinkan</button>
       </div>
     </div>
   </div>
